@@ -2,71 +2,77 @@ import socket
 import datetime
 import hashlib
 import time
-import threading
 
 HOST = "0.0.0.0"
 PORT = 2222
 
 
 def receive_input(client):
-    data = client.recv(1024).decode()
-    return data.replace("\r", "").replace("\n", "").strip()
+    """
+    Receives input from client and cleans carriage returns/newlines.
+    Returns 'EMPTY' if no data entered.
+    """
+    data = client.recv(1024).decode(errors="ignore")
+    data = data.replace("\r", "").replace("\n", "").strip()
+
+    if not data:
+        return "EMPTY"
+
+    return data
 
 
-def handle_client(client, addr):
-    print(f"[+] Connection from {addr}")
+# Create honeypot socket
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Allow immediate port reuse after restart
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+server.bind((HOST, PORT))
+server.listen(5)
+
+print(f"[+] Honeypot running on {HOST}:{PORT}")
+
+while True:
+    client, addr = server.accept()
+    attacker_ip = addr[0]
+
+    print(f"[+] Connection received from {attacker_ip}")
+
     try:
+        # Simulate SSH banner
         client.send(b"SSH-2.0-OpenSSH_7.4\r\n")
         time.sleep(0.5)
 
-        # USERNAME
+        # Ask for username
         client.send(b"Username: ")
         username = receive_input(client)
 
-        # PASSWORD
+        # Ask for password
         client.send(b"Password: ")
         password = receive_input(client)
 
-        print(f"[DEBUG] Username: {username}, Password: {password}")
+        print(f"[DEBUG] Captured -> Username: {username}, Password: {password}")
 
-        # HASH PASSWORD
+        # Hash password using SHA-256
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
-        log = f"{datetime.datetime.now()} | {addr[0]} | {username} | {hashed_password}\n"
+        # Create log entry
+        log_entry = (
+            f"{datetime.datetime.now()} | "
+            f"{attacker_ip} | "
+            f"{username} | "
+            f"{hashed_password}\n"
+        )
 
-        with open("logs.txt", "a") as f:
-            f.write(log)
+        # Save to logs
+        with open("logs.txt", "a") as log_file:
+            log_file.write(log_entry)
 
+        # Always deny login
         client.send(b"Login failed\r\n")
 
     except Exception as e:
-        print(f"[!] Error handling {addr}: {e}")
+        print(f"[ERROR] {e}")
 
     finally:
         client.close()
-        print(f"[-] Connection closed: {addr}")
-
-
-def main():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # FIX: Allow reuse of address so server doesn't crash on restart
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((HOST, PORT))
-    server.listen(50)
-
-    print(f"🚨 Honeypot running on port {PORT}...")
-
-    try:
-        while True:
-            client, addr = server.accept()
-            # FIX: Handle each client in its own thread so server isn't blocked
-            t = threading.Thread(target=handle_client, args=(client, addr), daemon=True)
-            t.start()
-    except KeyboardInterrupt:
-        print("\n[!] Shutting down honeypot.")
-    finally:
-        server.close()
-
-
-if __name__ == "__main__":
-    main()

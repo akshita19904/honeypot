@@ -2,6 +2,7 @@
 //  HONEYNET DASHBOARD — script.js
 // ═══════════════════════════════════════════════
 
+
 // ── CLOCK ──────────────────────────────────────
 function updateClock() {
     const now = new Date();
@@ -64,14 +65,23 @@ function addLog(html, type = "") {
 }
 
 // ── ALERT BANNER ───────────────────────────────
-const alerts = [
-    "BRUTE-FORCE PATTERN DETECTED ON PORT 2222",
-    "REPEATED CREDENTIAL STUFFING FROM LOCALHOST",
-    "DICTIONARY ATTACK SIGNATURE IDENTIFIED",
-    "HIGH FREQUENCY LOGIN ATTEMPTS — POSSIBLE BOTNET",
-    "SHA-256 HASH LOGGING ACTIVE — ALL PASSWORDS CAPTURED"
-];
+// FIX 1: Initialize alerts array at module level so cycleAlerts() can access it
+let alerts = ["SYSTEM ARMED — MONITORING ACTIVE"];
 let alertIdx = 0;
+
+function updateAlerts(data) {
+    const alertText = document.getElementById("alertText");
+
+    if (data.alerts && data.alerts.length > 0) {
+        // FIX 2: Populate the module-level alerts array from loaded data
+        alerts = data.alerts;
+        alertText.textContent = alerts[0];
+    } else {
+        alerts = ["NO ACTIVE THREATS DETECTED"];
+        alertText.textContent = alerts[0];
+    }
+}
+
 function cycleAlerts() {
     const el = document.getElementById("alertText");
     el.style.opacity = 0;
@@ -97,13 +107,30 @@ function getThreatLevel(total) {
 function loadData() {
     addLog("> FETCHING data.json...", "init");
 
-    fetch("../data.json")
+    fetch("../data.json?v=" + Date.now())
         .then(r => {
             if (!r.ok) throw new Error("HTTP " + r.status);
             return r.json();
         })
         .then(data => {
             addLog("> DATA LOADED SUCCESSFULLY ✓", "init");
+            updateAlerts(data);
+
+            if (data.brute_force_ips && data.brute_force_ips.length > 0) {
+                addLog(
+                    "> BRUTE FORCE DETECTED FROM: " +
+                    data.brute_force_ips.join(", "),
+                    "danger"
+                );
+            }
+
+            if (data.suspicious_usernames && data.suspicious_usernames.length > 0) {
+                addLog(
+                    "> SUSPICIOUS USERNAMES: " +
+                    data.suspicious_usernames.join(", "),
+                    "warn"
+                );
+            }
 
             const total     = data.total_attempts || 0;
             const uniqueIps = data.unique_ips      || 0;
@@ -132,18 +159,28 @@ function loadData() {
             }, 700);
 
             // Threat level
-            const threat = getThreatLevel(total);
-            setTimeout(() => {
-                const el = document.getElementById("threatLevel");
-                el.textContent = threat.label;
-                el.style.color = threat.color;
-                el.style.textShadow = "0 0 20px " + threat.color;
-                const bar = document.getElementById("bar-threat");
-                bar.style.background  = threat.color;
-                bar.style.boxShadow   = "0 0 8px " + threat.color;
-                bar.style.width       = threat.pct + "%";
-                document.getElementById("threatMeta").textContent = "↑ " + total + " ATTEMPTS RECORDED";
-            }, 900);
+            const severity = data.severity || "LOW";
+
+            const el = document.getElementById("threatLevel");
+            el.textContent = severity;
+
+            let threatColor = "#00ff88";
+            if (severity === "MEDIUM") threatColor = "#ffaa00";
+            if (severity === "HIGH")   threatColor = "#ff003c";
+
+            el.style.color      = threatColor;
+            el.style.textShadow = "0 0 20px " + threatColor;
+
+            const bar = document.getElementById("bar-threat");
+            bar.style.background  = threatColor;
+            bar.style.boxShadow   = "0 0 8px " + threatColor;
+            bar.style.width =
+                severity === "LOW"    ? "30%"  :
+                severity === "MEDIUM" ? "65%"  :
+                "100%";
+
+            document.getElementById("threatMeta").textContent =
+                "↑ " + severity + " RISK DETECTED";
 
             // Username list
             const maxU = Math.max(...Object.values(usernames), 1);
@@ -165,7 +202,7 @@ function loadData() {
                 userList.appendChild(div);
                 setTimeout(() => { div.querySelector(".user-bar-fill").style.width = pct + "%"; }, 200 + i * 80);
                 addLog(
-                    '<span class="ts">' + new Date().toISOString().slice(11,19) + '</span>' +
+                    '<span class="ts">' + new Date().toLocaleTimeString('en-IN', {timeZone:'Asia/Kolkata', hour12:false}) + '</span>' +
                     '<span class="ip">USERNAME</span>' +
                     '<span class="user">' + user + '</span>— ' + count + ' attempt(s)',
                     count > 3 ? "danger" : "warn"
@@ -192,15 +229,15 @@ function loadData() {
                 ipList.appendChild(div);
                 setTimeout(() => { div.querySelector(".user-bar-fill").style.width = pct + "%"; }, 200 + i * 80);
                 addLog(
-                    '<span class="ts">' + new Date().toISOString().slice(11,19) + '</span>' +
+                    '<span class="ts">' + new Date().toLocaleTimeString('en-IN', {timeZone:'Asia/Kolkata', hour12:false}) + '</span>' +
                     '<span class="ip">' + ip + '</span>— ' + count + ' login attempt(s) recorded',
                     "warn"
                 );
             });
 
-            // Footer
+            // FIX 3: Use severity directly instead of undefined threat.label
             document.getElementById("footerStats").textContent =
-                "TOTAL: " + total + " | IPs: " + uniqueIps + " | TOP USER: " + topUser.toUpperCase() + " | THREAT: " + threat.label;
+                "TOTAL: " + total + " | IPs: " + uniqueIps + " | TOP USER: " + topUser.toUpperCase() + " | THREAT: " + severity;
 
             // Log replay
             setTimeout(() => simulateLogReplay(total), 1500);
@@ -221,7 +258,7 @@ function simulateLogReplay(total) {
     const count  = Math.max(total, 1);
     for (let i = 0; i < count; i++) {
         setTimeout(() => {
-            const ts   = new Date(Date.now() - (count - i) * 15000).toISOString().slice(11,19);
+            const ts   = new Date(Date.now() - (count - i) * 15000).toLocaleTimeString('en-IN', {timeZone:'Asia/Kolkata', hour12:false});
             const user = users[i % users.length];
             const hash = hashes[i % hashes.length];
             addLog(
