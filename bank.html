@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaBank — Secure Online Banking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0a1628;
+            --navy2: #112240;
+            --gold: #c9a84c;
+            --gold2: #e8c97a;
+            --white: #f0f4ff;
+            --dim: #8899aa;
+            --red: #e74c3c;
+            --green: #2ecc71;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--navy);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── NAV ── */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            border-bottom: 1px solid rgba(201,168,76,0.2);
+            background: rgba(10,22,40,0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .nav-logo {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            color: var(--gold);
+            letter-spacing: 0.05em;
+        }
+
+        .nav-logo span { color: var(--white); }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--dim);
+        }
+
+        .nav-links li { cursor: pointer; transition: color 0.2s; }
+        .nav-links li:hover { color: var(--gold); }
+
+        /* ── HERO SPLIT ── */
+        .page {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: calc(100vh - 65px);
+        }
+
+        /* LEFT SIDE */
+        .left {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+            padding: 80px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left::before {
+            content: '';
+            position: absolute;
+            top: -100px; left: -100px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .left::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; right: -80px;
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(201,168,76,0.1);
+            border: 1px solid rgba(201,168,76,0.3);
+            color: var(--gold);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            padding: 6px 14px;
+            border-radius: 2px;
+            margin-bottom: 32px;
+            width: fit-content;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: blink 1.5s step-end infinite;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 3.2rem;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            color: var(--white);
+        }
+
+        h1 em {
+            font-style: normal;
+            color: var(--gold);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--dim);
+            line-height: 1.7;
+            max-width: 400px;
+            margin-bottom: 48px;
+            font-weight: 300;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 0.9rem;
+            color: var(--dim);
+        }
+
+        .feature-icon {
+            width: 36px; height: 36px;
+            background: rgba(201,168,76,0.1);
+            border: 1px solid rgba(201,168,76,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* RIGHT SIDE — LOGIN */
+        .right {
+            background: #f8f7f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            margin-bottom: 36px;
+        }
+
+        .login-header h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.9rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .login-header p {
+            font-size: 0.85rem;
+            color: #8899aa;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: #556;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid #dde;
+            background: white;
+            color: var(--navy);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            border-radius: 4px;
+        }
+
+        input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+        }
+
+        .error-msg {
+            background: #fff0f0;
+            border: 1px solid #ffcccc;
+            border-left: 3px solid var(--red);
+            color: var(--red);
+            font-size: 0.8rem;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            display: none;
+            border-radius: 2px;
+        }
+
+        .error-msg.show { display: block; }
+
+        .warning-msg {
+            background: #fffbf0;
+            border: 1px solid #ffe082;
+            border-left: 3px solid #f59e0b;
+            color: #92400e;
+            font-size: 0.8rem;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            display: none;
+            border-radius: 2px;
+        }
+
+        .warning-msg.show { display: block; }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: var(--navy);
+            color: var(--gold);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+
+        .btn-login:hover { background: var(--navy2); }
+        .btn-login:active { transform: scale(0.99); }
+        .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .divider {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #aab;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: #dde;
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: #889;
+        }
+
+        .links a { color: var(--navy); text-decoration: none; font-weight: 500; }
+        .links a:hover { color: var(--gold); text-decoration: underline; }
+
+        .security-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.72rem;
+            color: #aab;
+        }
+
+        .attempt-counter {
+            text-align: center;
+            font-size: 0.72rem;
+            color: #e74c3c;
+            margin-top: 10px;
+            min-height: 18px;
+            font-weight: 600;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--navy2);
+            border-top: 1px solid rgba(201,168,76,0.1);
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--dim);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        .shake { animation: shake 0.4s ease; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-logo">Nexa<span>Bank</span></div>
+    <ul class="nav-links">
+        <li>Personal</li>
+        <li>Business</li>
+        <li>Investments</li>
+        <li>Support</li>
+    </ul>
+</nav>
+
+<div class="page">
+    <!-- LEFT -->
+    <div class="left">
+        <div class="badge">BANK-GRADE SECURITY</div>
+        <h1>Banking built for the <em>modern world</em></h1>
+        <p class="subtitle">Secure, fast, and intelligent banking. Manage your finances with confidence backed by 256-bit encryption and real-time fraud detection.</p>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <span>256-bit SSL encryption on all transactions</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🛡️</div>
+                <span>Real-time fraud monitoring & alerts</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <span>Instant transfers across 40+ countries</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <span>Smart analytics for your spending habits</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT — LOGIN -->
+    <div class="right">
+        <div class="login-box">
+            <div class="login-header">
+                <h2>Welcome back</h2>
+                <p>Sign in to your NexaBank account</p>
+            </div>
+
+            <div class="error-msg" id="errorMsg">
+                ✗ Incorrect account number or password. Please try again.
+            </div>
+
+            <div class="warning-msg" id="warningMsg">
+                ⚠ Multiple failed attempts detected. One more failure will lock your session.
+            </div>
+
+            <div class="form-group">
+                <label>Account Number</label>
+                <input type="text" id="username" placeholder="e.g. NX-00123456" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+
+            <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+                SIGN IN SECURELY
+            </button>
+
+            <div class="attempt-counter" id="attemptCounter"></div>
+
+            <div class="divider">or</div>
+
+            <div class="links">
+                <a href="#">Forgot password?</a>
+                <a href="#">Open an account</a>
+            </div>
+
+            <div class="security-note">
+                🔒 This connection is encrypted and monitored for security purposes.
+                All login attempts are logged.
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <span>© 2026 NexaBank Ltd. All rights reserved.</span>
+    <span>Privacy Policy · Terms of Service · Security Centre</span>
+</footer>
+
+<script>
+    let attempts = 0;
+    const MAX_ATTEMPTS = 3;
+
+    // Log attempt to honeypot server via fetch
+    function logToHoneypot(username, password) {
+        // This mirrors what your server.py logs — sends to your Python honeypot
+        fetch("http://localhost:2222", {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        }).catch(() => {
+            // Honeypot server doesn't respond with HTTP — that's fine
+            // The attempt is already being caught by server.py via TCP
+        });
+
+        // Also store locally so dashboard can read it
+        const logs = JSON.parse(localStorage.getItem("honeypot_logs") || "[]");
+        const crypto_hash = btoa(password); // base64 as stand-in for demo
+        logs.push({
+            timestamp: new Date().toISOString(),
+            ip: "127.0.0.1",
+            username: username,
+            hash: crypto_hash
+        });
+        localStorage.setItem("honeypot_logs", JSON.stringify(logs));
+    }
+
+    function handleLogin() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const errorMsg   = document.getElementById("errorMsg");
+        const warningMsg = document.getElementById("warningMsg");
+        const counter    = document.getElementById("attemptCounter");
+        const loginBtn   = document.getElementById("loginBtn");
+        const box        = document.getElementById("username");
+
+        if (!username || !password) {
+            errorMsg.textContent = "✗ Please enter both account number and password.";
+            errorMsg.classList.add("show");
+            return;
+        }
+
+        attempts++;
+        logToHoneypot(username, password);
+
+        // Shake animation
+        box.classList.remove("shake");
+        void box.offsetWidth;
+        box.classList.add("shake");
+
+        const remaining = MAX_ATTEMPTS - attempts;
+
+        if (attempts >= MAX_ATTEMPTS) {
+            // REDIRECT TO HONEYPOT
+            errorMsg.classList.remove("show");
+            warningMsg.classList.remove("show");
+            counter.textContent = "⚠ Session locked. Redirecting...";
+            loginBtn.disabled = true;
+            loginBtn.textContent = "SESSION LOCKED";
+
+            setTimeout(() => {
+                // Redirect to honeypot dashboard
+                window.location.href = "../frontend/index.html";
+            }, 2000);
+
+        } else if (attempts === MAX_ATTEMPTS - 1) {
+            errorMsg.classList.add("show");
+            warningMsg.classList.add("show");
+            counter.textContent = `⚠ ${remaining} attempt remaining before lockout`;
+        } else {
+            errorMsg.classList.add("show");
+            warningMsg.classList.remove("show");
+            counter.textContent = `${remaining} attempts remaining`;
+        }
+
+        // Clear password field
+        document.getElementById("password").value = "";
+    }
+
+    // Allow Enter key
+    document.addEventListener("keydown", e => {
+        if (e.key === "Enter") handleLogin();
+    });
+</script>
+
+</body>
+</html>

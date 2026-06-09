@@ -277,3 +277,4 @@ setTimeout(() => addLog("> MATRIX RENDERER ONLINE", "init"), 200);
 setTimeout(() => addLog("> THREAT ENGINE ARMED", "init"), 500);
 setTimeout(() => addLog("> CONNECTING TO HONEYPOT LOG...", "init"), 900);
 setTimeout(loadData, 1200);
+setTimeout(loadData, 1200);
