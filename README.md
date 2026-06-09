@@ -96,7 +96,7 @@ Displays attack statistics, threat levels, suspicious usernames, IP analysis, an
 
 ## Live Dashboard
 
-**Live Demo:** [PASTE YOUR VERCEL LINK HERE]
+**Live Demo:** https://honeypot-system-gamma.vercel.app/
 
 ---
 
@@ -141,7 +141,3 @@ http://localhost:8000
 ```
 
 ---
-
-# Live dashboard link -- https://honeypot-system-gamma.vercel.app/ 
-
-Manipal Institute of Technology Bengaluru
