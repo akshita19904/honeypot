@@ -107,7 +107,7 @@ function getThreatLevel(total) {
 function loadData() {
     addLog("> FETCHING data.json...", "init");
 
-    fetch("../data.json?v=" + Date.now())
+    fetch("./data.json?v=" + Date.now())
         .then(r => {
             if (!r.ok) throw new Error("HTTP " + r.status);
             return r.json();
